@@ -1,0 +1,369 @@
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <cstdlib>
+#include <chrono>
+
+using namespace std::chrono;
+using namespace std;
+
+const int MINE = 9;
+const string UNCOVER = "u";
+const string FLAG = "f";
+const int SHOW_MARK = 1;
+const int UNSHOW_MARK = 0;
+const int FLAG_MARK = 2;
+
+int maxRows = 16;
+int maxCols = 30;
+int cols = 0;
+int rows = 0;
+int mines = 0;
+bool isNeedShowMine = false;
+auto startDatetime = system_clock::now();
+
+string gameOver = "";
+
+int numberInput(string text, int min, int max)
+{
+	while (true)
+	{
+		cout << text;
+		int result;
+		cin >> result;
+
+		if (!cin.fail()) {
+			if (result >= min && result <= max)
+			{
+				return result;
+			}
+		}
+
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	}
+}
+
+string stringInput(string text, string first, string second)
+{
+	while (true)
+	{
+		cout << text;
+		string value;
+		cin >> value;
+
+		if (value == first || value == second)
+		{
+			return value;
+		}
+	}
+}
+
+void sayWelcome()
+{
+	cout << endl << "Welcome to Minesweeper!" << endl << endl;
+
+	cout << "Set game options:" << endl;
+	rows = numberInput("rows (min: 1, max: " + to_string(maxRows) + "): ", 1, maxRows);
+	cols = numberInput("cols: (min: 1, max: " + to_string(maxCols) + "): ", 1, maxCols);
+	mines = numberInput("mines: (min: 1, max: " + to_string(rows * cols) + "): ", 1, rows * cols);
+
+	cout << endl << "Generating Minesweeper grid..." << endl;
+	cout << "Game started! Good luck!" << endl;
+}
+
+void showGameOver()
+{
+	cout << endl;
+	cout << "********************************" << endl;
+	cout << gameOver << endl;
+	cout << "********************************" << endl;
+}
+
+bool isGameOver(int*** gameField)
+{
+	if (gameOver != "")
+	{
+		showGameOver();
+		return true;
+	}
+
+	int flags = 0;
+
+	for (int row = 0; row < rows; row++)
+	{
+		for (int col = 0; col < cols; col++)
+		{
+			if ((gameField[row][col][1] == UNSHOW_MARK || gameField[row][col][1] == FLAG_MARK) && gameField[row][col][0] != MINE)
+			{
+				return false;
+			}
+
+			if (gameField[row][col][1] == FLAG_MARK)
+			{
+				flags++;
+			}
+		}
+	}
+
+	if (flags != mines)
+	{
+		return false;
+	}
+
+	gameOver = "Congratulations! You won!";
+	showGameOver();
+
+	return true;
+}
+
+string getDiffTime()
+{
+	auto endDatetime = system_clock::now();
+
+	auto diff = duration_cast<seconds>(endDatetime - startDatetime);
+
+	long long diffSeconds = diff.count();
+
+	long long diffHours = diffSeconds / 3600;
+
+	diffSeconds -= diffHours * 3600;
+
+	long long diffMinuts = diffSeconds / 60;
+
+	diffSeconds -= diffMinuts * 60;
+
+	return to_string(diffHours) + ":" + to_string(diffMinuts) + ":" + to_string(diffSeconds);
+}
+
+void viewer(int*** gameField)
+{
+	cout << endl << endl;
+	cout << "Time: " << getDiffTime();
+	cout << "   Mines: " << mines << endl;
+	cout << endl;
+
+	for (int row = 0; row < rows; row++)
+	{
+		for (int col = 0; col < cols; col++)
+		{
+			if (gameField[row][col][0] == MINE && isNeedShowMine)
+			{
+				cout << "@";
+				continue;
+			}
+
+			if (gameField[row][col][0] == 0 && gameField[row][col][1] == SHOW_MARK)
+			{
+				cout << "#";
+				continue;
+			}
+
+			if (gameField[row][col][1] == FLAG_MARK)
+			{
+				cout << "F";
+				continue;
+			}
+
+			if (gameField[row][col][1] == SHOW_MARK)
+			{
+				cout << gameField[row][col][0];
+				continue;
+			}
+
+			cout << "X";
+		}
+
+		cout << endl;
+	}
+
+	cout << endl;
+}
+
+void checker(int*** gameField, int row, int col, string action)
+{
+	if (gameField[row][col][1] == SHOW_MARK)
+	{
+		return;
+	}
+
+	if (action == FLAG)
+	{
+		if (gameField[row][col][1] == FLAG_MARK)
+		{
+			gameField[row][col][1] = UNSHOW_MARK;
+		}
+		else
+		{
+			gameField[row][col][1] = FLAG_MARK;
+		}
+
+		return;
+	}
+
+	if (gameField[row][col][0] == MINE)
+	{
+		if (gameField[row][col][1] != FLAG_MARK)
+		{
+			isNeedShowMine = true;
+			gameOver = "Sorry. You lose!";
+		}
+
+		return;
+	}
+
+	if (gameField[row][col][0] > 0)
+	{
+		gameField[row][col][1] = SHOW_MARK;
+		return;
+	}
+
+	gameField[row][col][1] = SHOW_MARK;
+
+	if (col - 1 >= 0)
+	{
+		checker(gameField, row, col - 1, UNCOVER);
+	}
+
+	if (row - 1 >= 0 && col - 1 >= 0)
+	{
+		checker(gameField, row - 1, col - 1, UNCOVER);
+	}
+
+	if (row - 1 >= 0)
+	{
+		checker(gameField, row - 1, col, UNCOVER);
+	}
+
+	if (row - 1 >= 0 && col + 1 < cols)
+	{
+		checker(gameField, row - 1, col + 1, UNCOVER);
+	}
+
+	if (col + 1 < cols)
+	{
+		checker(gameField, row, col + 1, UNCOVER);
+	}
+
+	if (row + 1 < rows && col + 1 < cols)
+	{
+		checker(gameField, row + 1, col + 1, UNCOVER);
+	}
+
+	if (row + 1 < rows)
+	{
+		checker(gameField, row + 1, col, UNCOVER);
+	}
+
+	if (row + 1 < rows && col - 1 >= 0)
+	{
+		checker(gameField, row + 1, col - 1, UNCOVER);
+	}
+}
+
+void minesGeneration(int*** gameField, int mines)
+{
+	do
+	{
+		int row = rand() % rows;
+		int col = rand() % cols;
+
+		if (gameField[row][col][0] != MINE)
+		{
+			gameField[row][col][0] = MINE;
+			mines--;
+
+			if (col - 1 >= 0 && gameField[row][col - 1][0] != MINE)
+			{
+				gameField[row][col - 1][0]++;
+			}
+
+			if (row - 1 >= 0 && col - 1 >= 0 && gameField[row - 1][col - 1][0] != MINE)
+			{
+				gameField[row - 1][col - 1][0]++;
+			}
+
+			if (row - 1 >= 0 && gameField[row - 1][col][0] != MINE)
+			{
+				gameField[row - 1][col][0]++;
+			}
+
+			if (row - 1 >= 0 && col + 1 < cols && gameField[row - 1][col + 1][0] != MINE)
+			{
+				gameField[row - 1][col + 1][0]++;
+			}
+
+			if (col + 1 < cols && gameField[row][col + 1][0] != MINE)
+			{
+				gameField[row][col + 1][0]++;
+			}
+
+			if (row + 1 < rows && col + 1 < cols && gameField[row + 1][col + 1][0] != MINE)
+			{
+				gameField[row + 1][col + 1][0]++;
+			}
+
+			if (row + 1 < rows && gameField[row + 1][col][0] != MINE)
+			{
+				gameField[row + 1][col][0]++;
+			}
+
+			if (row + 1 < rows && col - 1 >= 0 && gameField[row + 1][col - 1][0] != MINE)
+			{
+				gameField[row + 1][col - 1][0]++;
+			}
+		}
+
+	} while (mines > 0);
+}
+
+void initGameField(int*** gameField)
+{
+	gameOver = "";
+	isNeedShowMine = false;
+	startDatetime = system_clock::now();
+
+	for (int row = 0; row < rows; ++row) {
+		gameField[row] = new int* [cols];
+		for (int col = 0; col < cols; ++col) {
+			gameField[row][col] = new int[2];
+			gameField[row][col][0] = 0;
+			gameField[row][col][1] = UNSHOW_MARK;
+		}
+	}
+
+	minesGeneration(gameField, mines);
+}
+
+int main()
+{
+	do
+	{
+		sayWelcome();
+
+		int*** gameField = new int** [rows];
+
+		initGameField(gameField);
+
+		viewer(gameField);
+
+		while (!isGameOver(gameField))
+		{
+			int row = numberInput("row: (min: 1, max: " + to_string(rows) + "): ", 1, rows);
+			int col = numberInput("col: (min: 1, max: " + to_string(cols) + "): ", 1, cols);
+			string action = stringInput("action: (uncover cell: u, set flag: f): ", "u", "f");
+
+			checker(gameField, row - 1, col - 1, action);
+
+			viewer(gameField);
+		}
+
+		cout << endl;
+
+	} while (stringInput("Play again? (y/n): ", "y", "n") == "y");
+
+	cout << endl;
+	cout << "Thank you for playing Minesweeper!" << endl;
+
+	return 0;
+}
