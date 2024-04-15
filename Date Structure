@@ -9,23 +9,23 @@ const string ONE_OF_THE_DATES_IS_INCORRECT = "One of the dates is incorrect";
 
 struct month
 {
-    string name;
-    int numberOfDays;
+	string name;
+	int numberOfDays;
 };
 
 const vector<month> MONTHS{
- {"January", 31},
- {"February", 28},
- {"March", 31},
- {"April", 30},
- {"May", 31},
- {"June", 30},
- {"July", 31},
- {"August", 31},
- {"September", 30},
- {"October", 31},
- {"November", 30},
- {"December", 31},
+	{"January", 31},
+	{"February", 28},
+	{"March", 31},
+	{"April", 30},
+	{"May", 31},
+	{"June", 30},
+	{"July", 31},
+	{"August", 31},
+	{"September", 30},
+	{"October", 31},
+	{"November", 30},
+	{"December", 31},
 };
 
 const vector<string> DAYS_OF_THE_WEEK{ "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
@@ -33,112 +33,163 @@ const vector<string> DAYS_OF_THE_WEEK{ "Saturday", "Sunday", "Monday", "Tuesday"
 struct date
 {
 public:
-    void newDate(int d, int m, int y) {
-        day = d;
-        month = m;
-        year = y;
-    }
+	date(int d, int m, int y) {
+		day = d;
+		month = m;
+		year = y;
+	}
 
-    bool isValidDate() const {
-        if (year < 1) {
-            return false;
-        }
+	void newDate(int d, int m, int y) {
+		day = d;
+		month = m;
+		year = y;
+	}
 
-        if (month < 1 || month > 12) {
-            return false;
-        }
+	bool isValidDate() const {
+		if (year < 1) {
+			return false;
+		}
 
-        int numberOfDays = MONTHS[month - 1].numberOfDays;
-        if (month == 2 && isLeapYear(year)) {
-            numberOfDays++;
-        }
+		if (month < 1 || month > 12) {
+			return false;
+		}
 
-        if (day < 1 || day > numberOfDays) {
-            return false;
-        }
+		int numberOfDays = MONTHS[month - 1].numberOfDays;
+		if (month == 2 && isLeapYear()) {
+			numberOfDays++;
+		}
 
-        return true;
-    }
+		if (day < 1 || day > numberOfDays) {
+			return false;
+		}
 
-    string getDayOfWeek() {
-        if (!isValidDate()) {
-            return INVALID_DATE;
-        }
+		return true;
+	}
 
-        int dayOfWeek = getNumberOfDaysByDate(*this) % 7;
+	string getDayOfWeek() {
+		if (!isValidDate()) {
+			return INVALID_DATE;
+		}
 
-        return DAYS_OF_THE_WEEK[dayOfWeek];
-    }
+		int dayOfWeek = numberOfDaysByDate() % 7;
 
-    int calculateDifference(const date& dt) {
-        if (!isValidDate() || !dt.isValidDate()) {
-            cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
-            return 0;
-        }
+		return DAYS_OF_THE_WEEK[dayOfWeek];
+	}
 
-        return abs(getNumberOfDaysByDate(*this) - getNumberOfDaysByDate(dt));
-    }
+	int calculateDifference(const date& dt) {
+		if (!isValidDate() || !dt.isValidDate()) {
+			cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
+			return 0;
+		}
 
-    string printDate() {
-        if (!isValidDate()) {
-            return INVALID_DATE;
-        }
+		return abs(numberOfDaysByDate() - dt.numberOfDaysByDate());
+	}
 
-        return MONTHS[month - 1].name + " " + to_string(day) + ", " + to_string(year);
-    }
+	string printDate() {
+		if (!isValidDate()) {
+			return INVALID_DATE + " (" + to_string(day) + "." + to_string(month) + "." + to_string(year) + ")";
+		}
 
-    bool operator < (const date& dt)
-    {
-        if (!isValidDate() || !dt.isValidDate()) {
-            cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
-            return false;
-        }
+		return MONTHS[month - 1].name + " " + to_string(day) + ", " + to_string(year);
+	}
 
-        return year < dt.year(year == dt.year && month < dt.month)  (year == dt.year && month == dt.month && day < dt.day);
-    }
+	bool operator < (const date& dt)
+	{
+		if (!isValidDate() || !dt.isValidDate()) {
+			cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
+			return false;
+		}
+
+		return year < dt.year || (year == dt.year && month < dt.month) || (year == dt.year && month == dt.month && day < dt.day);
+	}
 
 private:
-    int day = 0;
-    int month = 0;
-    int year = 0;
+	int day = 0;
+	int month = 0;
+	int year = 0;
 
-    bool isLeapYear(int y) const {
-        return y % 4 == 0;
-    }
+	bool isLeapYear() const {
+		return year % 4 == 0;
+	}
 
-    long long getNumberOfDaysByDate(date dt)
-    {
-        long long result = ((dt.year - 1) * 365) + ((dt.year - 1) / 4);
+	long long numberOfDaysByDate() const
+	{
+		long long result = ((year - 1) * 365) + ((year - 1) / 4);
 
-        if (dt.month > 1) {
-            for (int i = 0; i < dt.month - 1; i++)
-            {
-                result += MONTHS[i].numberOfDays;
+		if (month > 1) {
+			for (int i = 0; i < month - 1; i++)
+			{
+				result += MONTHS[i].numberOfDays;
 
-                if (i == 1 && isLeapYear(dt.year)) {
-                    result++;
-                }
-            }
-        }
+				if (i == 1 && isLeapYear()) {
+					result++;
+				}
+			}
+		}
 
-        return result + dt.day;
-    }
+		return result + day;
+	}
+};
+
+void sort(vector<date>& vec) {
+	for (int i = 0; i < vec.size(); ++i) {
+		if (!vec[i].isValidDate()) {
+			cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
+			return;
+		}
+	}
+
+	for (int i = 0; i < vec.size() - 1; ++i) {
+		int minIndex = i;
+
+		for (int j = i + 1; j < vec.size(); ++j) {
+			if (vec[j] < vec[minIndex]) {
+				minIndex = j;
+			}
+		}
+
+		swap(vec[i], vec[minIndex]);
+	}
+}
+
+vector<date> dates = {
+	{ 10, 4, 2024 },
+	{ 5, 4, 2024 },
+	{ 1, 4, 2024 },
+	{ 9, 4, 2024 },
+	{ 7, 4, 2024 },
+	{ 5, 4, 2024 },
+	{ 2, 4, 2024 },
+	{ 31, 3, 2024 }
 };
 
 int main()
 {
-    date myDate;
-    myDate.newDate(15, 4, 2024);
-    cout << myDate.printDate() << endl;
-    cout << myDate.getDayOfWeek() << endl;
+	date myDate(1, 1, 1);
+	myDate.newDate(12, 4, 2024);
+	cout << myDate.printDate() << endl;
+	cout << myDate.getDayOfWeek() << endl;
 
-    date myDate2;
-    myDate2.newDate(15, 4, 2024);
-    cout << myDate2.printDate() << endl;
-    cout << myDate2.getDayOfWeek() << endl;
-    cout << myDate.calculateDifference(myDate2) << endl;
+	date myDate2(1, 1, 1);
+	myDate2.newDate(14, 4, 2024);
+	cout << myDate2.printDate() << endl;
+	cout << myDate2.getDayOfWeek() << endl;
+	cout << "Difference = " + to_string(myDate.calculateDifference(myDate2)) << endl;
 
-    cout << (myDate < myDate2) << endl;
+	cout << myDate.printDate() + " < " + myDate2.printDate() + " = " + to_string(myDate < myDate2) << endl;
 
-    return 0;
+	cout << endl;
+	cout << "Unsort version:" << endl;
+	for (int i = 0; i < dates.size(); ++i) {
+		cout << to_string(i + 1) + ": " + dates[i].printDate() << endl;
+	}
+
+	cout << endl;
+	cout << "Sort version:" << endl;
+	sort(dates);
+	for (int i = 0; i < dates.size(); ++i) {
+		cout << to_string(i + 1) + ": " + dates[i].printDate() << endl;
+	}
+
+	return 0;
 }
