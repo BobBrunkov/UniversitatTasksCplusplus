@@ -1,1 +1,144 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+//Date Struct
 
+const string INVALID_DATE = "Invalid Date";
+const string ONE_OF_THE_DATES_IS_INCORRECT = "One of the dates is incorrect";
+
+struct month
+{
+    string name;
+    int numberOfDays;
+};
+
+const vector<month> MONTHS{
+ {"January", 31},
+ {"February", 28},
+ {"March", 31},
+ {"April", 30},
+ {"May", 31},
+ {"June", 30},
+ {"July", 31},
+ {"August", 31},
+ {"September", 30},
+ {"October", 31},
+ {"November", 30},
+ {"December", 31},
+};
+
+const vector<string> DAYS_OF_THE_WEEK{ "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
+
+struct date
+{
+public:
+    void newDate(int d, int m, int y) {
+        day = d;
+        month = m;
+        year = y;
+    }
+
+    bool isValidDate() const {
+        if (year < 1) {
+            return false;
+        }
+
+        if (month < 1 || month > 12) {
+            return false;
+        }
+
+        int numberOfDays = MONTHS[month - 1].numberOfDays;
+        if (month == 2 && isLeapYear(year)) {
+            numberOfDays++;
+        }
+
+        if (day < 1 || day > numberOfDays) {
+            return false;
+        }
+
+        return true;
+    }
+
+    string getDayOfWeek() {
+        if (!isValidDate()) {
+            return INVALID_DATE;
+        }
+
+        int dayOfWeek = getNumberOfDaysByDate(*this) % 7;
+
+        return DAYS_OF_THE_WEEK[dayOfWeek];
+    }
+
+    int calculateDifference(const date& dt) {
+        if (!isValidDate() || !dt.isValidDate()) {
+            cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
+            return 0;
+        }
+
+        return abs(getNumberOfDaysByDate(*this) - getNumberOfDaysByDate(dt));
+    }
+
+    string printDate() {
+        if (!isValidDate()) {
+            return INVALID_DATE;
+        }
+
+        return MONTHS[month - 1].name + " " + to_string(day) + ", " + to_string(year);
+    }
+
+    bool operator < (const date& dt)
+    {
+        if (!isValidDate() || !dt.isValidDate()) {
+            cout << ONE_OF_THE_DATES_IS_INCORRECT << endl;
+            return false;
+        }
+
+        return year < dt.year(year == dt.year && month < dt.month)  (year == dt.year && month == dt.month && day < dt.day);
+    }
+
+private:
+    int day = 0;
+    int month = 0;
+    int year = 0;
+
+    bool isLeapYear(int y) const {
+        return y % 4 == 0;
+    }
+
+    long long getNumberOfDaysByDate(date dt)
+    {
+        long long result = ((dt.year - 1) * 365) + ((dt.year - 1) / 4);
+
+        if (dt.month > 1) {
+            for (int i = 0; i < dt.month - 1; i++)
+            {
+                result += MONTHS[i].numberOfDays;
+
+                if (i == 1 && isLeapYear(dt.year)) {
+                    result++;
+                }
+            }
+        }
+
+        return result + dt.day;
+    }
+};
+
+int main()
+{
+    date myDate;
+    myDate.newDate(15, 4, 2024);
+    cout << myDate.printDate() << endl;
+    cout << myDate.getDayOfWeek() << endl;
+
+    date myDate2;
+    myDate2.newDate(15, 4, 2024);
+    cout << myDate2.printDate() << endl;
+    cout << myDate2.getDayOfWeek() << endl;
+    cout << myDate.calculateDifference(myDate2) << endl;
+
+    cout << (myDate < myDate2) << endl;
+
+    return 0;
+}
