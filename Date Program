@@ -5,13 +5,20 @@
 using namespace std;
 //Date Struct
 
-struct month
+struct MonthVariable
 {
-	string name;
-	int numberOfDays;
+	string monthName;
+	int monthDays;
 };
 
-const vector<month> MONTHS
+struct Date
+{
+	int day;
+	int month;
+	int year;
+};
+
+const vector<MonthVariable> MONTHS =
 {
 	{"January", 31},
 	{"February", 28},
@@ -27,7 +34,7 @@ const vector<month> MONTHS
 	{"December", 31},
 };
 
-const vector<string> DAYS_OF_WEEK
+const vector<string> WEEK_DAY =
 {
 	"Monday",
 	"Tuesday",
@@ -42,6 +49,7 @@ void greeting(int& userInput)
 {
 	while (userInput < 1 || userInput > 5)
 	{
+		cout << endl;
 		cout << "Welcome to Date Container Program" << endl;
 		cout << "Functions: " << endl;
 		cout << "1: Create New Date" << endl;
@@ -53,36 +61,140 @@ void greeting(int& userInput)
 	}
 }
 
-void createNewDate(Date myDates)
+bool isLeapYear(int year)
+{
+	if ((year % 4 == 0) && (year % 100 != 0))
+	{
+		return true;
+	}
+	if ((year % 4 == 0) && (year % 100 == 0) && (year % 400 == 0))
+	{
+		return true;
+	}
+	return false;
+}
+
+bool isValidDate(int day, int month, int year)
+{
+	if (year < 1)
+	{
+		return false;
+	}
+	if (month < 1 || month > 12)
+	{
+		return false;
+	}
+	int numberOfDays = MONTHS[month - 1].monthDays;
+	if (month == 2 && isLeapYear(year))
+	{
+		numberOfDays++;
+	}
+	if (day < 1 || day > numberOfDays)
+	{
+		return false;
+	}
+	return true;
+}
+
+void sortDates(vector<Date> myDates)
+{
+	do
+	{
+
+	} while ();
+}
+
+void createNewDate(vector<Date> myDates)
 {
 	int day, month, year;
 	while (true)
 	{
-		cout << "Enter your date in numbers with spaces: DAY _ MONTH _ YEAR";
+		cout << "Enter your date in numbers with spaces: DAY MONTH YEAR" << endl;
 		cin >> day >> month >> year;
 		if (!cin)
 		{
+			cout << endl << "Invalid Input!" << endl;
+			cin.clear();
+			continue;
+		}
+		if (!isValidDate(day, month, year))
+		{
+			cout << endl << "Invalid Input!" << endl;
+			cin.clear();
 			continue;
 		}
 		break;
 	}
+	myDates.push_back({ day, month, year });
+	sortDates(myDates);
 }
 
-struct Date
+void showListOfDates(vector<Date> myDates)
 {
-	int day;
-	int month;
-	int year;
-
-	bool isValidDate(int day, int month, int year)
+	cout << endl << "List of Dates: dd/mm/yyyy";
+	int count = 1;
+	for (const auto& date : myDates)
 	{
-
+		int d = date.day;
+		int m = date.month;
+		int y = date.year;
+		cout << endl << count << ": ";
+		if (d < 10)
+		{
+			cout << "0" << d;
+		}
+		else
+		{
+			cout << d;
+		}
+		cout << "/";
+		if (m < 10)
+		{
+			cout << "0" << m;
+		}
+		else
+		{
+			cout << m;
+		}
+		cout << "/";
+		if (y < 1000 && y < 100 && y < 10)
+		{
+			cout << "000" << y;
+		}
+		else if (y < 1000 && y < 100)
+		{
+			cout << "00" << y;
+		}
+		else if (y < 1000)
+		{
+			cout << "0" << y;
+		}
+		else
+		{
+			cout << y;
+		}
 	}
-};
+}
+
+void printDate(vector<Date> myDates)
+{
+	showListOfDates(myDates);
+	int userInput = 0;
+	while (userInput < 1 || userInput > myDates.size())
+	{
+		cout << endl << "Choose Date" << endl;
+		cin >> userInput;
+		if (!cin)
+		{
+			continue;
+		}
+	}
+
+}
 
 int main()
 {
-	Date myDates = {};
+	vector<Date> myDates = {};
 	while (true)
 	{
 		int userInput = 0;
@@ -93,6 +205,7 @@ int main()
 		}
 		if (userInput == 2)
 		{
+			printDate(myDates);
 		}
 		if (userInput == 3)
 		{
