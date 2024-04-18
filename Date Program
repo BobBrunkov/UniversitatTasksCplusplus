@@ -1,0 +1,111 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+//Date Struct
+
+struct month
+{
+	string name;
+	int numberOfDays;
+};
+
+const vector<month> MONTHS
+{
+	{"January", 31},
+	{"February", 28},
+	{"March", 31},
+	{"April", 30},
+	{"May", 31},
+	{"June", 30},
+	{"July", 31},
+	{"August", 31},
+	{"September", 30},
+	{"October", 31},
+	{"November", 30},
+	{"December", 31},
+};
+
+const vector<string> DAYS_OF_WEEK
+{
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+	"Sunday",
+};
+
+void greeting(int& userInput)
+{
+	while (userInput < 1 || userInput > 5)
+	{
+		cout << "Welcome to Date Container Program" << endl;
+		cout << "Functions: " << endl;
+		cout << "1: Create New Date" << endl;
+		cout << "2: Print Date" << endl;
+		cout << "3: Calculate difference in days between 2 dates" << endl;
+		cout << "4: Get Day Name" << endl;
+		cout << "5: To Quit" << endl;
+		std::cin >> userInput;
+	}
+}
+
+void createNewDate(Date myDates)
+{
+	int day, month, year;
+	while (true)
+	{
+		cout << "Enter your date in numbers with spaces: DAY _ MONTH _ YEAR";
+		cin >> day >> month >> year;
+		if (!cin)
+		{
+			continue;
+		}
+		break;
+	}
+}
+
+struct Date
+{
+	int day;
+	int month;
+	int year;
+
+	bool isValidDate(int day, int month, int year)
+	{
+
+	}
+};
+
+int main()
+{
+	Date myDates = {};
+	while (true)
+	{
+		int userInput = 0;
+		greeting(userInput);
+		if (userInput == 1)
+		{
+			createNewDate(myDates);
+		}
+		if (userInput == 2)
+		{
+		}
+		if (userInput == 3)
+		{
+		}
+		if (userInput == 4)
+		{
+		}
+		if (userInput == 5)
+		{
+			break;
+		}
+	}
+	cout << endl << "Program shutting down...";
+
+	return 0;
+}
